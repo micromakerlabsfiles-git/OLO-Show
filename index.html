@@ -97,8 +97,12 @@
                         <div class="text-center my-4">
                             <esp-web-install-button manifest="dist/manifest.json"></esp-web-install-button>
                         </div>
-                        <div class="alert-olo">
+                        <div class="alert-olo mb-4">
                             ⚠️ <strong>Note:</strong> Requires HTTPS context (GitHub Pages or localhost).
+                        </div>
+                        <div class="d-flex flex-column gap-2 mt-2">
+                            <a href="https://github.com/micromakerlabsfiles-git/OLO-Show/blob/main/README.md" target="_blank" class="btn btn-accent fw-bold text-decoration-none text-center">📖 Read User Manual (Required Before Flashing)</a>
+                            <a href="https://github.com/micromakerlabsfiles-git/OLO-Show" target="_blank" class="btn btn-outline-accent fw-bold text-decoration-none text-center">📂 GitHub Repository</a>
                         </div>
                     </div>
                 </div>
@@ -137,6 +141,56 @@
                             <div id="customFlashProgressBar" class="progress-bar" style="background:var(--accent);width:0%;"></div>
                         </div>
                         <textarea id="customFlashLogs" class="w-100 rounded p-2" style="height:110px;" readonly>Ready. Connect device to begin flashing...</textarea>
+                    </div>
+                </div>
+
+                <!-- FAQ Section — Combined Full Width -->
+                <div class="col-12 mt-2">
+                    <div class="glass-card">
+                        <h3 class="mb-4 text-white">🙋 Frequently Asked Questions & Quick Guide</h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <h4 class="h5 mb-3 text-secondary" style="letter-spacing: 0.5px;">⚙️ System &amp; Troubleshooting</h4>
+                                <div class="p-3 rounded border border-secondary border-opacity-10 bg-black bg-opacity-20 mb-3">
+                                    <h5 style="color:var(--accent);">❓ Why does the browser flasher say "Failed to download manifest"?</h5>
+                                    <p class="small text-secondary mb-0">This error means the browser can't locate the <code>dist/manifest.json</code> file. Make sure the <code>dist/</code> folder containing <code>manifest.json</code> and the binary files exists in the same directory as <code>index.html</code>. Flashing also requires a secure HTTPS context or <code>localhost</code>.</p>
+                                </div>
+                                <div class="p-3 rounded border border-secondary border-opacity-10 bg-black bg-opacity-20 mb-3">
+                                    <h5 style="color:var(--accent);">❓ My screen is shifted, scrambled, or showing static after flashing?</h5>
+                                    <p class="small text-secondary mb-0">This occurs if you flash <strong>SSD1306</strong> firmware onto a <strong>SH1106</strong> display (or vice versa). SSD1306 is typically for 0.96" screens; SH1106 is for 1.3" screens. Select the correct driver in the builder GUI before compiling, or toggle the <code>#define USE_SH1106</code> / <code>USE_SSD1306</code> inside <code>include/Config.h</code>.</p>
+                                </div>
+                                <div class="p-3 rounded border border-secondary border-opacity-10 bg-black bg-opacity-20 mb-3">
+                                    <h5 style="color:var(--accent);">❓ Which files are required for my GitHub repository?</h5>
+                                    <p class="small text-secondary mb-0">To ensure the suite runs correctly from GitHub Pages, you must upload: <code>index.html</code>, <code>omggif.js</code>, <code>build_firmware.py</code>, <code>build_exe.bat</code>, <code>platformio.ini</code>, the <code>src/</code> and <code>include/</code> directories, the <code>dist/</code> directory, and <code>OLO_Show_Builder.exe</code>.</p>
+                                </div>
+                                <div class="p-3 rounded border border-secondary border-opacity-10 bg-black bg-opacity-20">
+                                    <h5 style="color:var(--accent);">❓ My COM port isn't showing up. What should I do?</h5>
+                                    <p class="small text-secondary mb-0">Ensure you are using a USB cable that supports data transfer (many are charge-only). Check that the CH340 or CP210x drivers are installed on your computer. If using the ESP32-C3 Supermini, hold down the BOOT button while plugging in the USB cable to enter bootloader mode.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h4 class="h5 mb-3 text-secondary" style="letter-spacing: 0.5px;">🎬 Animation &amp; Operation</h4>
+                                <div class="p-3 rounded border border-secondary border-opacity-10 bg-black bg-opacity-20 mb-3" style="border-left: 3px solid var(--accent) !important;">
+                                    <h5 class="text-white">🚀 Quick Guide: How to Use the Converter</h5>
+                                    <ol class="small text-secondary ps-3 mb-0">
+                                        <li class="mb-1">Navigate to the <strong>Animation Converter</strong> tab above.</li>
+                                        <li class="mb-1">Click the folder icon next to a slot to select a video/GIF, or click <strong>📦 Load ZIP of Videos</strong> to import multiple files at once.</li>
+                                        <li class="mb-1">Use the <strong>➕ Add Slot</strong> button if you have more animations to load (up to 10 slots).</li>
+                                        <li class="mb-1">Adjust conversion settings (Dithering algorithm, scale mode, target FPS) to preview the output frame.</li>
+                                        <li class="mb-1">Click <strong>🚀 Convert &amp; Process All Loaded Videos</strong>.</li>
+                                        <li class="mb-0">Click <strong>📦 Download All as ZIP</strong>. Extract and compile these headers using the firmware builder!</li>
+                                    </ol>
+                                </div>
+                                <div class="p-3 rounded border border-secondary border-opacity-10 bg-black bg-opacity-20 mb-3">
+                                    <h5 style="color:var(--accent);">❓ What are the touch controls and gestures?</h5>
+                                    <p class="small text-secondary mb-0">Single tap to Play/Pause. Double tap to cycle to the next slot (or the clock). Long press (1 second) to restart the current animation back to the first frame.</p>
+                                </div>
+                                <div class="p-3 rounded border border-secondary border-opacity-10 bg-black bg-opacity-20">
+                                    <h5 style="color:var(--accent);">❓ Can I change the default pin wiring?</h5>
+                                    <p class="small text-secondary mb-0">Yes, the pins can be customized in <code>include/Config.h</code> before compiling your custom firmware. By default, OLED SDA is GPIO 20, SCL is GPIO 21, Touch is GPIO 1, Buzzer is GPIO 2, and NeoPixel is GPIO 6.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
