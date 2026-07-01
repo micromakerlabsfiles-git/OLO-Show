@@ -414,12 +414,6 @@ pyinstaller --noconfirm --onefile --windowed --name "OLO_Show_Builder" build_fir
 
 ---
 
-## 📄 License
-
-This project is open source. See [LICENSE](LICENSE) for details.
-
----
-
 ## 🙏 Credits
 
 - **OLO Show** — MicroMaker Labs
