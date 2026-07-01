@@ -68,23 +68,6 @@ OLO_Show/
 
 ---
 
-### ❌ Files to Exclude from GitHub
-
-These files are auto-generated, too large for Git, or machine-specific. **Do not commit them:**
-
-| File / Folder | Reason to Exclude |
-|---|---|
-| `.pio/` | PlatformIO build cache (auto-generated on every build) |
-| `build/` | PyInstaller build artifacts |
-| `dist/` | Compiled `.exe` output from PyInstaller |
-| `firmware.bin` | Pre-built factory binary → host via **GitHub Releases** instead |
-| `firmware_custom.bin` | User-generated custom binary (created locally per-user) |
-| `OLO_Show_Builder.exe` | Compiled Windows executable → host via **GitHub Releases** |
-| `OLO_Show.7z` | Project archive → host via **GitHub Releases** |
-| `*.mp4` / `*.gif` / `*.avi` | Sample media files (large; user supplies their own) |
-| `include/video*.h` | Large auto-generated animation headers (~1 MB+ each) |
-| `.vscode/` | IDE-specific settings (partially covered by `.gitignore`) |
-
 ### 📋 Recommended `.gitignore`
 
 ```gitignore
