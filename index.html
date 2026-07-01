@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLO Show — Web Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #2d3436 0%, #000000 100%);
+            --glass-bg: rgba(255,255,255,0.05);
+            --glass-border: rgba(255,255,255,0.1);
+            --accent: #ff793f;
+            --accent-hover: #cd6133;
+        }
+        *{box-sizing:border-box;}
+        body{background:var(--bg-gradient);min-height:100vh;color:#d1d8e0;font-family:'Space Grotesk',system-ui,sans-serif;padding:30px 0;}
+        h1,h2,h3,h4,h5{font-family:'Space Grotesk',system-ui,sans-serif;}
+        code,pre,.font-monospace,textarea,#clockDisplay{font-family:'JetBrains Mono',monospace!important;}
+        h3{font-size:1.15rem;font-weight:700;margin-bottom:.5rem;}
+        h5{font-size:.95rem;font-weight:600;}
+
+        /* Glass cards */
+        .glass-card{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.5);padding:22px;margin-bottom:20px;}
+
+        /* Tabs */
+        .nav-tabs{border-bottom:2px solid var(--glass-border)!important;}
+        .nav-tabs .nav-link{color:#d1d8e0!important;border:none!important;padding:11px 22px;font-weight:600;background:transparent!important;transition:color .2s;}
+        .nav-tabs .nav-link:hover{color:var(--accent)!important;}
+        .nav-tabs .nav-link.active{color:#fff!important;border-bottom:3px solid var(--accent)!important;}
+
+        /* Accent buttons */
+        .btn-outline-accent{color:var(--accent);border-color:var(--accent);background:transparent;transition:all .2s;}
+        .btn-outline-accent:hover{color:#fff;background:var(--accent-hover);border-color:var(--accent-hover);}
+        .btn-accent{color:#fff;background:var(--accent);border-color:var(--accent);}
+        .btn-accent:hover{background:var(--accent-hover);border-color:var(--accent-hover);}
+
+        /* Status badge */
+        #deviceStatus, #flasherStatus{letter-spacing:.5px;font-size:.75rem;}
+
+        /* Forms */
+        input[type=range]{accent-color:var(--accent);}
+        input[type=text],input[type=number],select{background:#111!important;color:#fff!important;border:1px solid var(--glass-border)!important;border-radius:8px!important;}
+        textarea{background:#000!important;color:var(--accent)!important;border:1px solid var(--glass-border)!important;font-family:monospace;font-size:12px;resize:vertical;}
+        .form-label{font-size:.82rem;color:#aaa;margin-bottom:3px;}
+        .custom-panel{display:none;background:#1a1a1a;padding:14px;border-radius:8px;border:1px dashed var(--glass-border);margin-top:8px;}
+        .reset-btn{background:none;border:none;color:#666;font-size:15px;cursor:pointer;padding:0 4px;line-height:1;}
+        .reset-btn:hover{color:var(--accent);}
+
+        /* ESP web tools */
+        esp-web-install-button{--esp-tools-button-color:#ff793f;--esp-tools-button-text-color:#fff;--esp-tools-button-border-radius:10px;}
+
+        /* Progress */
+        .progress{border-radius:6px;overflow:hidden;}
+        .progress-bar{transition:width .3s;}
+
+        /* Canvas preview */
+        #canvas{image-rendering:pixelated;width:100%;border:1px solid var(--accent);border-radius:8px;background:#000;}
+
+        /* Alert inline */
+        .alert-olo{background:rgba(255,121,63,.08);border-left:3px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:.82rem;color:#aaa;}
+
+        /* Clock display */
+        #clockDisplay{font-family:'Courier New',monospace;font-size:1.5rem;color:var(--accent);letter-spacing:3px;text-align:center;padding:10px 0;}
+
+        /* Connection info row */
+        .conn-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    </style>
+</head>
+<body>
+<div class="container-lg">
+    <div class="text-center mb-4">
+        <h1 class="fw-bold text-white mb-1">OLO SHOW</h1>
+        <p style="color:var(--accent);font-size:1rem;margin:0;">Dynamic Firmware Flasher &amp; Interface Suite</p>
+    </div>
+
+    <!-- TABS NAV -->
+    <ul class="nav nav-tabs justify-content-center mb-4" id="oloTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabFlasher" type="button">🔥 Firmware Flasher</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabController" type="button">🎛 USB Controller</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabConverter" type="button">🎬 Animation Converter</button></li>
+    </ul>
+
+    <div class="tab-content" id="oloTabsContent">
+
+        <!-- =============================================
+             TAB 1 — FIRMWARE FLASHER
+             ============================================= -->
+        <div class="tab-pane fade show active" id="tabFlasher" role="tabpanel">
+            <div class="row g-3">
+                <!-- Standard ESP Web Tools -->
+                <div class="col-lg-6">
+                    <div class="glass-card h-auto">
+                        <h3>⚡ Standard Factory Flasher</h3>
+                        <p class="text-secondary small mb-4">Flash the default OLO Show firmware directly from your browser using the ESP Web Tools installer.</p>
+                        <div class="text-center my-4">
+                            <esp-web-install-button manifest="dist/manifest.json"></esp-web-install-button>
+                        </div>
+                        <div class="alert-olo">
+                            ⚠️ <strong>Note:</strong> Requires HTTPS context (GitHub Pages or localhost).
+                        </div>
+                    </div>
+                </div>
+                <!-- Custom Binary Flasher — Independent connection -->
+                <div class="col-lg-6">
+                    <div class="glass-card h-auto">
+                        <h3>⚡ Custom Binary Programmer</h3>
+                        <p class="text-secondary small">Flash your custom <code>firmware_custom.bin</code> (output of the Python build tool) to the device.</p>
+
+                        <div class="mb-3">
+                            <label class="form-label">Select firmware .bin file</label>
+                            <input class="form-control" type="file" id="customBinFile" accept=".bin">
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="includeBootloaderPartitions" style="accent-color:var(--accent);">
+                            <label class="form-check-label text-secondary small" for="includeBootloaderPartitions">
+                                📦 Include Bootloader (0x0) &amp; Partitions (0x8000)
+                            </label>
+                        </div>
+
+                        <div class="conn-row mb-3">
+                            <button id="customFlashConnBtn" class="btn btn-outline-accent flex-fill py-2 fw-bold" onclick="connectCustomFlasher()">🔌 Connect Device</button>
+                            <span id="flasherStatus" class="badge bg-danger">DISCONNECTED</span>
+                        </div>
+                        
+                        <div class="d-flex gap-2 mb-3">
+                            <button id="customFlashBtn" class="btn btn-danger flex-fill py-2 fw-bold" onclick="flashCustomBin()" disabled>⚡ Flash Binary</button>
+                            <button id="customResetBtn" class="btn btn-outline-warning flex-fill py-2 fw-bold" onclick="resetDevice()" disabled>↻ Reset Device</button>
+                        </div>
+
+                        <div class="d-flex justify-content-between small text-secondary mb-1">
+                            <span>Write Progress</span><span id="customFlashProgressPct">0%</span>
+                        </div>
+                        <div class="progress bg-dark mb-3" style="height:8px;">
+                            <div id="customFlashProgressBar" class="progress-bar" style="background:var(--accent);width:0%;"></div>
+                        </div>
+                        <textarea id="customFlashLogs" class="w-100 rounded p-2" style="height:110px;" readonly>Ready. Connect device to begin flashing...</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =============================================
+             TAB 2 — USB WEB CONTROLLER
+             ============================================= -->
+        <div class="tab-pane fade" id="tabController" role="tabpanel">
+            <!-- Connection bar at top spanning full width -->
+            <div class="glass-card h-auto mb-3">
+                <div class="conn-row justify-content-between">
+                    <div>
+                        <h3 class="mb-0">🔌 USB Web Controller</h3>
+                        <p class="text-secondary small mb-0 mt-1">Connects over WebSerial to configure the OLO Show device in real-time.</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <span id="deviceStatus" class="badge bg-danger">DISCONNECTED</span>
+                        <div id="clockDisplay" style="display:none;">--:--:--</div>
+                        <div class="btn-group" role="group">
+                            <button id="btn12h" class="btn btn-outline-secondary btn-sm" onclick="setClockMode(true)">12h</button>
+                            <button id="btn24h" class="btn btn-outline-accent btn-sm active" onclick="setClockMode(false)">24h</button>
+                        </div>
+                        <button id="connectBtn" class="btn btn-outline-accent px-4 py-2 fw-bold" onclick="connectUSBController()">🔌 Connect USB</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <!-- LEFT: Real-time controls -->
+                <div class="col-xl-6">
+                    <div class="glass-card h-auto">
+                        <h3>🎚 Real-Time Controls</h3>
+
+                        <div class="mb-3 mt-3">
+                            <label class="form-label d-flex justify-content-between">
+                                LED Brightness <span id="ctrlBrightVal" class="text-white font-monospace">60</span>
+                            </label>
+                            <input type="range" class="form-range" id="ctrlBrightness" min="0" max="255" value="60" oninput="onSliderBrightness()">
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6">
+                                <label class="form-label">LED Pattern</label>
+                                <select id="ctrlLedEffect" class="form-select" onchange="sendCtrlSettings()">
+                                    <option value="0">OFF</option>
+                                    <option value="1" selected>Rainbow Cycle</option>
+                                    <option value="2">Solid Red</option>
+                                    <option value="3">Solid Green</option>
+                                    <option value="4">Solid Blue</option>
+                                    <option value="5">Solid Cyan</option>
+                                    <option value="6">Solid Magenta</option>
+                                    <option value="7">Solid Yellow</option>
+                                    <option value="8">Color Breath</option>
+                                    <option value="9">Fire Flicker</option>
+                                    <option value="10">LED Chase</option>
+                                    <option value="11">Starry Sparkle</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Playstate</label>
+                                <div class="btn-group w-100" role="group">
+                                    <button id="btnPlay" type="button" class="btn btn-accent fw-bold" onclick="setPlayState(true)">▶ Play</button>
+                                    <button id="btnPause" type="button" class="btn btn-outline-secondary fw-bold" onclick="setPlayState(false)">⏸ Pause</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Video Play Mode</label>
+                            <select id="ctrlPlayMode" class="form-select" onchange="sendCtrlSettings()">
+                                <option value="0" selected>🔁 Single File Loop</option>
+                                <option value="1">➡️ Play One-by-One in Order</option>
+                                <option value="2">🔀 Random Video Play</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-flex justify-content-between">
+                                <span>⏱️ Gap Between Plays: <span id="gapDelayVal" class="text-white fw-bold">1000 ms</span></span>
+                            </label>
+                            <input type="range" class="form-range" id="ctrlGapDelay"
+                                   min="0" max="5000" step="100" value="1000"
+                                   oninput="document.getElementById('gapDelayVal').innerText=this.value+' ms';"
+                                   onchange="sendCtrlSettings()">
+                            <div class="d-flex justify-content-between" style="font-size:.7rem;color:#555;margin-top:2px;">
+                                <span>0 ms (instant)</span><span>2.5 s</span><span>5 s</span>
+                            </div>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="ctrlSound" checked onchange="sendCtrlSettings()" style="accent-color:var(--accent);">
+                            <label class="form-check-label text-secondary" for="ctrlSound">Enable Buzzer Sound Feedback</label>
+                        </div>
+                    </div>
+
+                    <!-- Bootloader settings under controls -->
+                    <div class="glass-card h-auto">
+                        <h3>⚙️ Startup Boot Parameters</h3>
+
+                        <div class="row g-2 mb-3 mt-2">
+                            <div class="col-sm-4">
+                                <label class="form-label">Boot Delay</label>
+                                <select id="bootDelay" class="form-select">
+                                    <option value="0">0s Direct</option>
+                                    <option value="1" selected>1s Delay</option>
+                                    <option value="2">2s Delay</option>
+                                    <option value="3">3s Delay</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label">Boot Melody</label>
+                                <select id="bootMelody" class="form-select">
+                                    <option value="1" selected>Standard Chime</option>
+                                    <option value="2">Fanfare</option>
+                                    <option value="0">Silence</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label">Active Slot</label>
+                                <select id="activeSlot" class="form-select">
+                                    <option value="1" selected>Slot 1 (video1)</option>
+                                    <option value="2">Slot 2 (video2)</option>
+                                    <option value="3">Slot 3 (video3)</option>
+                                    <option value="4">Slot 4 (video4)</option>
+                                    <option value="5">Slot 5 (video5)</option>
+                                    <option value="6">Slot 6 (video6)</option>
+                                    <option value="7">Slot 7 (video7)</option>
+                                    <option value="8">Slot 8 (video8)</option>
+                                    <option value="9">Slot 9 (video9)</option>
+                                    <option value="10">Slot 10 (video10)</option>
+                                    <option value="11">Slot 11 (Clock Screen)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Splash Screen Text</label>
+                            <input type="text" id="bootSplash" class="form-control" value="OLO SHOW ACTIVE" maxlength="20">
+                        </div>
+
+                        <button class="btn btn-outline-accent w-100 py-2 fw-bold" onclick="saveBootloader()">💾 Save Boot Settings</button>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Pin & Display config -->
+                <div class="col-xl-6">
+                    <div class="glass-card h-auto">
+                        <h3>🔌 Hardware Pin Configuration</h3>
+                        <p class="text-secondary small">Changes are saved to device flash and take effect after reboot.</p>
+
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Display Driver</label>
+                            <select id="pinDisplayType" class="form-select">
+                                <option value="1" selected>SSD1306 — 0.96" OLED (I2C)</option>
+                                <option value="2">SH1106 — 1.3" OLED (I2C)</option>
+                            </select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-4">
+                                <label class="form-label">SDA Pin</label>
+                                <input type="number" id="pinSda" class="form-control text-center" value="20">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">SCL Pin</label>
+                                <input type="number" id="pinScl" class="form-control text-center" value="21">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label">Touch Pin</label>
+                                <input type="number" id="pinTouch" class="form-control text-center" value="1">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Buzzer Pin</label>
+                                <input type="number" id="pinBuzzer" class="form-control text-center" value="2">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">NeoPixel LED Pin</label>
+                                <input type="number" id="pinLed" class="form-control text-center" value="6">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-outline-accent w-100 py-2 fw-bold" onclick="savePins()">💾 Save &amp; Reboot with New Pins</button>
+
+                        <div class="alert-olo mt-4">
+                            💡 <strong>Tip:</strong> Connect the USB Controller first before saving pins. The device reboots automatically to apply changes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =============================================
+             TAB 3 — ANIMATION CONVERTER
+             ============================================= -->
+        <div class="tab-pane fade" id="tabConverter" role="tabpanel">
+            <div class="row g-3">
+
+                <!-- ═══════════════════════════════════════════
+                     LEFT COLUMN — File / Slot / Algorithm / Scale controls
+                     ═══════════════════════════════════════════ -->
+                <div class="col-lg-5">
+                    <div class="glass-card h-auto">
+                        <h3>1. Source &amp; Encoding Options</h3>
+
+                        <div class="mb-3 mt-2">
+                            <label class="form-label fw-bold text-accent">Animation Slots</label>
+                            <p class="text-secondary small mb-2">Load animation source files. Choose a preview file using the radio button.</p>
+                            <div class="table-responsive" style="max-height: 280px; overflow-y: auto; border: 1px solid #333; border-radius: 4px; background: #0c0c16;">
+                                <table class="table table-dark table-striped table-hover align-middle mb-0" style="font-size:0.85rem;">
+                                    <thead>
+                                        <tr style="--bs-table-bg: #121224;">
+                                            <th style="width: 60px;" class="text-center">Preview</th>
+                                            <th>Slot</th>
+                                            <th>File Source</th>
+                                            <th style="width: 80px;" class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="slotsTableBody">
+                                        <!-- Will be generated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 mb-3">
+                            <button class="btn btn-outline-accent flex-fill py-1 fw-bold" onclick="addSlotRow()">➕ Add Slot</button>
+                            <button class="btn btn-outline-danger flex-fill py-1 fw-bold" onclick="clearAllSlots()">🧹 Clear All Slots</button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-accent">Bulk Import Videos</label>
+                            <div class="d-flex gap-2">
+                                <input type="file" id="zipFileInput" accept=".zip" style="display:none;" onchange="handleZipUpload(event)">
+                                <button class="btn btn-outline-accent w-100 py-2 fw-bold" onclick="document.getElementById('zipFileInput').click()">📦 Load ZIP of Videos</button>
+                            </div>
+                        </div>
+
+                        <button id="rotateBtn" class="btn btn-outline-secondary w-100 mb-3 text-accent border-secondary">↻ Rotate 90°</button>
+
+                        <div class="mb-3">
+                            <label class="form-label">Dithering Algorithm</label>
+                            <select id="ditherMode" class="form-select">
+                                <option value="threshold">Solid Threshold (Pure B&amp;W)</option>
+                                <option value="bayer" selected>Bayer 8×8 (Smooth Gradient)</option>
+                                <option value="floyd">Floyd-Steinberg (Detailed)</option>
+                                <option value="atkinson">Atkinson (High Contrast)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Screen Scaling</label>
+                            <select id="scaleMode" class="form-select">
+                                <option value="fit">Best Fit (Letterbox)</option>
+                                <option value="cover">Fill / Cover (Crop)</option>
+                                <option value="stretch">Stretch (Force 128×64)</option>
+                                <option value="custom">Custom Scale + Pan</option>
+                            </select>
+                        </div>
+
+                        <!-- Custom scale / pan panel — shown only for cover or custom -->
+                        <div id="customControls" class="custom-panel mb-3">
+                            <div class="mb-2" id="grpW">
+                                <label class="form-label d-flex justify-content-between">Width: <span id="cwVal" class="text-white">128</span></label>
+                                <input type="range" class="form-range" id="customW" min="10" max="256" value="128">
+                            </div>
+                            <div class="mb-2" id="grpH">
+                                <label class="form-label d-flex justify-content-between">Height: <span id="chVal" class="text-white">64</span></label>
+                                <input type="range" class="form-range" id="customH" min="10" max="128" value="64">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label d-flex justify-content-between">
+                                    <span>Pan X: <span id="cxVal" class="text-white">0</span></span>
+                                    <button class="reset-btn" id="resetX">↺</button>
+                                </label>
+                                <input type="range" class="form-range" id="customX" min="-128" max="128" value="0">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label d-flex justify-content-between">
+                                    <span>Pan Y: <span id="cyVal" class="text-white">0</span></span>
+                                    <button class="reset-btn" id="resetY">↺</button>
+                                </label>
+                                <input type="range" class="form-range" id="customY" min="-64" max="64" value="0">
+                            </div>
+                        </div>
+
+                        <!-- Format-Specific Settings Card (Video vs GIF) -->
+                        <div id="formatControlsCard" class="glass-card mt-3 p-3" style="display:none;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;">
+                            <h4 id="formatTitle" class="text-accent mb-3" style="font-size:1.1rem;font-weight:bold;display:flex;align-items:center;gap:6px;">⚙️ Format Options</h4>
+                            
+                            <!-- Video Settings -->
+                            <div id="videoSpecificControls" style="display:none;">
+                                <div class="mb-3">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Target Video FPS: <span id="videoFpsVal" class="text-white">10</span></span>
+                                        <button class="reset-btn" id="resetVideoFps">↺</button>
+                                    </label>
+                                    <input type="range" class="form-range" id="videoFps" min="1" max="30" value="10">
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Max Video Duration: <span id="videoMaxDurationVal" class="text-white">3s</span></span>
+                                        <button class="reset-btn" id="resetVideoDuration">↺</button>
+                                    </label>
+                                    <input type="range" class="form-range" id="videoMaxDuration" min="1" max="15" value="3" step="0.5">
+                                </div>
+                            </div>
+                            
+                            <!-- GIF Settings -->
+                            <div id="gifSpecificControls" style="display:none;">
+                                <div class="mb-3">
+                                    <label class="form-label">Frame Count Mode</label>
+                                    <select id="gifFrameMode" class="form-select mb-2">
+                                        <option value="all" selected>Use Original GIF Frames</option>
+                                        <option value="custom">Set Custom Target Frames</option>
+                                    </select>
+                                    <div id="gifCustomFrameCountGroup" style="display:none;">
+                                        <label class="form-label d-flex justify-content-between">
+                                            <span>Custom Target Frames: <span id="gifCustomFrameCountVal" class="text-white">30</span></span>
+                                        </label>
+                                        <input type="range" class="form-range" id="gifCustomFrameCount" min="5" max="120" value="30" step="5">
+                                    </div>
+                                </div>
+                                <div class="mb-1">
+                                    <label class="form-label">Frame Delay Mode</label>
+                                    <select id="gifDelayMode" class="form-select mb-2">
+                                        <option value="natural" selected>Natural GIF Frame Delays</option>
+                                        <option value="override">Global Override Delay (ms)</option>
+                                    </select>
+                                    <div id="gifOverrideDelayGroup" style="display:none;">
+                                        <label class="form-label d-flex justify-content-between">
+                                            <span>Global Override Delay: <span id="gifOverrideDelayVal" class="text-white">100 ms</span></span>
+                                        </label>
+                                        <input type="range" class="form-range" id="gifOverrideDelay" min="10" max="500" value="100" step="5">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- /glass-card left -->
+                </div><!-- /left col-lg-5 -->
+
+                <!-- ═══════════════════════════════════════════
+                     RIGHT COLUMN — Preview | Sliders | Export
+                     ═══════════════════════════════════════════ -->
+                <div class="col-lg-7">
+
+                    <!-- ① Live OLED preview ─────────────────── -->
+                    <div class="glass-card h-auto mb-3">
+                        <h3>2. Live OLED Preview</h3>
+                        <div class="row g-2 align-items-center mt-1">
+                            <div class="col-6 text-center">
+                                <div class="text-secondary small mb-1">Source (Video / GIF)</div>
+                                <video id="videoEl" controls muted loop
+                                       class="w-100 rounded border border-secondary"
+                                       style="display:none;max-height:160px;"></video>
+                                <img id="gifEl"
+                                     class="w-100 rounded border border-secondary"
+                                     style="display:none;max-height:160px;object-fit:contain;"
+                                     alt="GIF preview">
+                                <div id="noMediaPlaceholder"
+                                     class="border border-secondary rounded d-flex align-items-center justify-content-center text-secondary small"
+                                     style="height:90px;">No file loaded</div>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="text-secondary small mb-1">OLED Output (128×64)</div>
+                                <canvas id="canvas" width="128" height="64"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Status / progress bar -->
+                        <div class="mt-3 px-2 py-2 rounded d-flex align-items-center justify-content-between gap-3"
+                             style="background:#0a0a0a;border:1px solid #222;">
+                            <div>
+                                <div id="status" class="fw-bold" style="color:var(--accent);font-size:.85rem;">Waiting for file...</div>
+                                <div class="small text-secondary">Frames: <b id="frameCount" class="text-white">0</b></div>
+                            </div>
+                            <div class="flex-fill" style="max-width:200px;">
+                                <div class="progress bg-dark" style="height:6px;display:none;" id="convertProgress">
+                                    <div id="convertProgressBar" class="progress-bar"
+                                         style="background:var(--accent);width:0%;transition:width .2s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ② Image Adjustment Sliders ──────────── -->
+                    <!-- Directly under the preview — tweak a slider, see result above -->
+                    <div class="glass-card h-auto mb-3">
+                        <h3>3. Image Adjustments</h3>
+                        <div class="row g-3 mt-1">
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Line Boldness: <span id="thickVal" class="text-white">Normal</span></span>
+                                        <button class="reset-btn" id="resetThick">↺</button>
+                                    </label>
+                                    <input type="range" class="form-range" id="thickness" min="-3" max="3" value="0" step="0.1">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Contrast: <span id="contrastVal" class="text-white">100%</span></span>
+                                        <button class="reset-btn" id="resetContrast">↺</button>
+                                    </label>
+                                    <input type="range" class="form-range" id="contrast" min="0" max="300" value="100">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="mb-3">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Brightness: <span id="brightVal" class="text-white">100%</span></span>
+                                        <button class="reset-btn" id="resetBrightness">↺</button>
+                                    </label>
+                                    <input type="range" class="form-range" id="brightness" min="0" max="200" value="100">
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>BW Threshold: <span id="threshVal" class="text-white">128</span></span>
+                                        <button class="reset-btn" id="resetThresh">↺</button>
+                                    </label>
+                                    <input type="range" class="form-range" id="threshold" min="0" max="255" value="128">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="invert"
+                                           style="accent-color:var(--accent);">
+                                    <label class="form-check-label text-secondary" for="invert">Invert Colors</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ③ Convert + Download ─────────────────── -->
+                    <div class="glass-card h-auto">
+                        <h3>4. Export Options</h3>
+                        <p class="text-secondary small mb-3">Process all loaded video files first, then download the C++ headers.</p>
+                        <button id="convertBtn" class="btn btn-accent w-100 py-2 fw-bold mb-3" disabled>🚀 Convert &amp; Process All Loaded Videos</button>
+                        <div class="d-flex gap-2">
+                            <button id="downloadArrayBtn" class="btn btn-outline-accent flex-fill py-2 fw-bold" disabled onclick="downloadHeaderFile()">📥 Download Preview Slot (.h)</button>
+                            <button id="downloadZipBtn" class="btn btn-success flex-fill py-2 fw-bold" disabled onclick="downloadAllZip()">📦 Download All as ZIP</button>
+                        </div>
+                    </div>
+
+                </div><!-- /right col-lg-7 -->
+            </div><!-- /row -->
+        </div><!-- /tabConverter -->
+
+    </div><!-- /tab-content -->
+
+    <div class="text-center text-secondary mt-4" style="font-size:.8rem;">
+        OLO Show Device Suite &nbsp;|&nbsp; <a href="https://esphome.github.io/esp-web-tools/" target="_blank" style="color:var(--accent);">ESP Web Tools</a>
+    </div>
+</div><!-- /container -->
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script type="module">
+  import { ESPLoader, Transport } from 'https://unpkg.com/esptool-js@0.4.6/bundle.js';
+  window.esptooljs = { ESPLoader, Transport };
+</script>
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+<script src="omggif.js"></script>
+
+<script>
+// ======================================================
+// SHARED UTILITIES
+// ======================================================
+function yieldToUI() {
+    // Yield control back to the browser event loop to prevent hang
+    return new Promise(r => setTimeout(r, 0));
+}
+
+function setStatus(msg, color = 'var(--accent)') {
+    const el = document.getElementById('status');
+    if (el) { el.innerText = msg; el.style.color = color; }
+}
+
+// ======================================================
+// TAB 1 — CUSTOM BINARY FLASHER
+// (Completely independent — no cross-tab disconnect)
+// ======================================================
+let customPort = null, customTransport = null, customLoader = null;
+
+function scrollFlashLogs() {
+    const t = document.getElementById('customFlashLogs');
+    t.scrollTop = t.scrollHeight;
+}
+
+async function connectCustomFlasher() {
+    const logs = document.getElementById('customFlashLogs');
+    const btn  = document.getElementById('customFlashConnBtn');
+    const badge = document.getElementById('flasherStatus');
+
+    if (customPort) {
+        // Disconnect
+        try {
+            if (customTransport) { await customTransport.disconnect(); customTransport = null; }
+            customPort = null; customLoader = null;
+        } catch(e) { console.warn('Flasher disconnect:', e); }
+        btn.innerText = '🔌 Connect Device';
+        badge.innerText = 'DISCONNECTED'; badge.className = 'badge bg-danger';
+        document.getElementById('customFlashBtn').disabled = true;
+        document.getElementById('customResetBtn').disabled = true;
+        return;
+    }
+
+    if (!('serial' in navigator)) {
+        alert('WebSerial not supported. Use Chrome or Edge.');
+        return;
+    }
+    try {
+        logs.value = 'Accessing serial hardware...\n';
+        customPort = await navigator.serial.requestPort();
+        customTransport = new esptooljs.Transport(customPort);
+        const terminal = {
+            clean: () => { logs.value = ''; },
+            write: s => { logs.value += s; scrollFlashLogs(); },
+            writeLine: s => { logs.value += s + '\n'; scrollFlashLogs(); }
+        };
+        customLoader = new esptooljs.ESPLoader({
+            transport: customTransport,
+            baudrate: 115200,
+            romBaudrate: 115200,
+            terminal: terminal
+        });
+        terminal.writeLine('Syncing with chip...');
+        const chipDesc = await customLoader.main();
+        terminal.writeLine('Connected! Chip: ' + chipDesc);
+        btn.innerText = '🔌 Disconnect';
+        badge.innerText = 'CONNECTED'; badge.className = 'badge bg-success';
+        document.getElementById('customFlashBtn').disabled = false;
+        document.getElementById('customResetBtn').disabled = false;
+    } catch(err) {
+        console.error(err);
+        logs.value += '\n[Error] ' + err.message + '\n';
+        customPort = null;
+        alert('Connection failed: ' + err.message);
+    }
+}
+
+async function flashCustomBin() {
+    const fileInput = document.getElementById('customBinFile');
+    const logs = document.getElementById('customFlashLogs');
+    const includeBootParts = document.getElementById('includeBootloaderPartitions').checked;
+    if (!fileInput.files.length) { alert('Select a .bin file first!'); return; }
+    if (!customLoader) { alert('Connect the device first!'); return; }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = async e => {
+        try {
+            document.getElementById('customFlashBtn').disabled = true;
+            document.getElementById('customFlashConnBtn').disabled = true;
+            document.getElementById('customResetBtn').disabled = true;
+            const fileArray = [];
+            
+            if (includeBootParts) {
+                logs.value += '\nFetching bootloader.bin and partitions.bin from server...\n';
+                const bootRes = await fetch('dist/bootloader.bin');
+                if (!bootRes.ok) throw new Error('Failed to download dist/bootloader.bin from server');
+                const bootBuf = await bootRes.arrayBuffer();
+                const bootBytes = new Uint8Array(bootBuf);
+                let bootStr = "";
+                for (let i = 0; i < bootBytes.length; i++) bootStr += String.fromCharCode(bootBytes[i]);
+                fileArray.push({ data: bootStr, address: 0x0 });
+                logs.value += '-> Bootloader ready (0x0).\n';
+
+                const partRes = await fetch('dist/partitions.bin');
+                if (!partRes.ok) throw new Error('Failed to download dist/partitions.bin from server');
+                const partBuf = await partRes.arrayBuffer();
+                const partBytes = new Uint8Array(partBuf);
+                let partStr = "";
+                for (let i = 0; i < partBytes.length; i++) partStr += String.fromCharCode(partBytes[i]);
+                fileArray.push({ data: partStr, address: 0x8000 });
+                logs.value += '-> Partitions ready (0x8000).\n';
+            }
+
+            const bytes = new Uint8Array(e.target.result);
+            let binaryStr = "";
+            for (let i = 0; i < bytes.length; i++) {
+                binaryStr += String.fromCharCode(bytes[i]);
+            }
+            fileArray.push({ data: binaryStr, address: 0x10000 });
+            logs.value += `-> Custom firmware ready (0x10000).\n`;
+
+            logs.value += `\nWriting files to flash...\n`;
+            await customLoader.writeFlash({
+                fileArray: fileArray,
+                flashSize: 'keep', flashMode: 'keep', flashFreq: 'keep',
+                eraseAll: includeBootParts,
+                compress: true,
+                reportProgress: (fileIdx, c, t) => {
+                    const pct = Math.round(c/t*100);
+                    document.getElementById('customFlashProgressBar').style.width = pct + '%';
+                    document.getElementById('customFlashProgressPct').innerText = pct + '%';
+                    const targetAddr = fileArray[fileIdx].address.toString(16).toUpperCase();
+                    setStatus(`Writing file ${fileIdx + 1}/${fileArray.length} at 0x${targetAddr} (${pct}%)`);
+                }
+            });
+            logs.value += '\n✅ Flash complete! Press RESET or click Reset Device.\n';
+            setStatus('Flash complete!', '#2ecc71');
+            alert('Custom firmware flashed!');
+        } catch(err) {
+            logs.value += '\n[Error] ' + err.message + '\n';
+            alert('Flashing failed: ' + err.message);
+        } finally {
+            document.getElementById('customFlashBtn').disabled = false;
+            document.getElementById('customFlashConnBtn').disabled = false;
+            document.getElementById('customResetBtn').disabled = false;
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+async function resetDevice() {
+    if (!customLoader) { alert('Connect the device first!'); return; }
+    const logs = document.getElementById('customFlashLogs');
+    try {
+        logs.value += '\nResetting device...\n';
+        await customLoader.hardReset();
+        logs.value += '✅ Reset command sent!\n';
+    } catch(err) {
+        logs.value += '\n[Error Reset] ' + err.message + '\n';
+        alert('Reset failed: ' + err.message);
+    }
+}
+
+// ======================================================
+// TAB 2 — USB WEB CONTROLLER
+// (Independent — no cross-tab disconnect)
+// ======================================================
+let devicePort = null, deviceReader = null, deviceWriter = null;
+let timeSyncInterval = null;
+let keepReading = false;
+
+async function connectUSBController() {
+    const btn = document.getElementById('connectBtn');
+    const badge = document.getElementById('deviceStatus');
+
+    if (devicePort) {
+        // Disconnect
+        keepReading = false;
+        stopTimeSync();
+        try {
+            if (deviceReader) {
+                await deviceReader.cancel();
+            }
+            if (deviceWriter) {
+                deviceWriter.releaseLock();
+                deviceWriter = null;
+            }
+            // Wait for reader loop to clean up and exit
+            await new Promise(r => setTimeout(r, 100));
+            if (devicePort) {
+                await devicePort.close();
+                devicePort = null;
+            }
+        } catch(e) {
+            console.warn('Controller disconnect:', e);
+            devicePort = null;
+        }
+        btn.innerText = '🔌 Connect USB';
+        badge.innerText = 'DISCONNECTED'; badge.className = 'badge bg-danger';
+        document.getElementById('clockDisplay').style.display = 'none';
+        return;
+    }
+
+    if (!('serial' in navigator)) { alert('WebSerial not supported. Use Chrome or Edge.'); return; }
+
+    try {
+        devicePort = await navigator.serial.requestPort();
+        await devicePort.open({ baudRate: 115200 });
+        deviceWriter = devicePort.writable.getWriter();
+
+        btn.innerText = '🔌 Disconnect';
+        badge.innerText = 'CONNECTED'; badge.className = 'badge bg-success';
+
+        // Immediately sync time and show clock
+        await sendTimeSync();
+        document.getElementById('clockDisplay').style.display = 'block';
+        startClockDisplay();
+
+        // Request device state
+        const enc = new TextEncoder();
+        await deviceWriter.write(enc.encode('GET_STATUS\n'));
+
+        // Periodic time sync every 3 s
+        startTimeSync();
+        readSerialData();
+    } catch(e) {
+        console.error(e);
+        devicePort = null;
+        alert('Failed to connect: ' + e.message);
+    }
+}
+
+let clockIs12h = false;
+
+async function sendTimeSync() {
+    if (!deviceWriter) return;
+    const now = new Date();
+    const hh = now.getHours(), mm = now.getMinutes(), ss = now.getSeconds();
+    const day = now.getDate(), month = now.getMonth()+1, year = now.getFullYear();
+    const cmd = `SET_TIME:${hh},${mm},${ss},${day},${month},${year}\n`;
+    try { await deviceWriter.write(new TextEncoder().encode(cmd)); } catch(e) { console.warn('Time sync:', e); }
+}
+
+async function setClockMode(is12h) {
+    clockIs12h = is12h;
+    document.getElementById('btn12h').classList.toggle('active', is12h);
+    document.getElementById('btn24h').classList.toggle('active', !is12h);
+    document.getElementById('btn12h').classList.toggle('btn-outline-accent', is12h);
+    document.getElementById('btn12h').classList.toggle('btn-outline-secondary', !is12h);
+    document.getElementById('btn24h').classList.toggle('btn-outline-accent', !is12h);
+    document.getElementById('btn24h').classList.toggle('btn-outline-secondary', is12h);
+    if (deviceWriter) {
+        const cmd = is12h ? 'SET_CLOCK_12H\n' : 'SET_CLOCK_24H\n';
+        try { await deviceWriter.write(new TextEncoder().encode(cmd)); } catch(e) {}
+    }
+}
+
+function startTimeSync() {
+    stopTimeSync();
+    timeSyncInterval = setInterval(sendTimeSync, 3000);
+}
+
+function stopTimeSync() {
+    if (timeSyncInterval) { clearInterval(timeSyncInterval); timeSyncInterval = null; }
+}
+
+// Live clock in the connection bar (runs purely in browser, not device-synced)
+let clockInterval = null;
+function startClockDisplay() {
+    if (clockInterval) clearInterval(clockInterval);
+    clockInterval = setInterval(() => {
+        const n = new Date();
+        const pad = v => String(v).padStart(2,'0');
+        let hh = n.getHours();
+        let suffix = '';
+        if (clockIs12h) {
+            suffix = hh >= 12 ? ' PM' : ' AM';
+            hh = hh % 12 || 12;
+        }
+        document.getElementById('clockDisplay').innerText =
+            pad(hh) + ':' + pad(n.getMinutes()) + ':' + pad(n.getSeconds()) + suffix;
+    }, 1000);
+}
+
+async function readSerialData() {
+    keepReading = true;
+    const decoder = new TextDecoder();
+    while (devicePort && devicePort.readable && keepReading) {
+        try {
+            deviceReader = devicePort.readable.getReader();
+            let buf = '';
+            while (keepReading) {
+                const { value, done } = await deviceReader.read();
+                if (done) break;
+                buf += decoder.decode(value, { stream: true });
+                let nl;
+                while ((nl = buf.indexOf('\n')) !== -1) {
+                    const line = buf.slice(0, nl).trim();
+                    buf = buf.slice(nl + 1);
+                    if (line.startsWith('{')) {
+                        try { applyDeviceConfigToUI(JSON.parse(line)); } catch(e) {}
+                    }
+                }
+            }
+        } catch(err) { console.error('Serial read:', err); break; }
+        finally { if (deviceReader) { try { deviceReader.releaseLock(); } catch(e) {} deviceReader = null; } }
+    }
+}
+
+let currentPlayState = true;
+
+function updatePlayStateButtons() {
+    const btnPlay = document.getElementById('btnPlay');
+    const btnPause = document.getElementById('btnPause');
+    if (currentPlayState) {
+        btnPlay.className = "btn btn-accent flex-fill fw-bold";
+        btnPause.className = "btn btn-outline-secondary flex-fill fw-bold";
+    } else {
+        btnPlay.className = "btn btn-outline-secondary flex-fill fw-bold";
+        btnPause.className = "btn btn-danger flex-fill fw-bold";
+    }
+}
+
+function setPlayState(play) {
+    currentPlayState = play;
+    updatePlayStateButtons();
+    sendCtrlSettings();
+}
+
+function applyDeviceConfigToUI(cfg) {
+    if (cfg.status !== 'OK') return;
+    const set = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
+    set('pinSda', cfg.sda); set('pinScl', cfg.scl); set('pinTouch', cfg.touch);
+    set('pinBuzzer', cfg.buzzer); set('pinLed', cfg.led);
+    set('pinDisplayType', cfg.display_type);
+    set('bootDelay', cfg.boot_delay);
+    
+    // Dynamically rebuild the active slot selection list
+    if (cfg.max_slots !== undefined) {
+        const activeSlotSelect = document.getElementById('activeSlot');
+        if (activeSlotSelect) {
+            const currentVal = cfg.active_slot;
+            activeSlotSelect.innerHTML = '';
+            for (let i = 1; i <= cfg.max_slots; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.innerText = `Slot ${i} (video${i})`;
+                activeSlotSelect.appendChild(opt);
+            }
+            const clockOpt = document.createElement('option');
+            clockOpt.value = cfg.max_slots + 1;
+            clockOpt.innerText = `Slot ${cfg.max_slots + 1} (Clock Screen)`;
+            activeSlotSelect.appendChild(clockOpt);
+            activeSlotSelect.value = currentVal;
+        }
+    } else {
+        set('activeSlot', cfg.active_slot);
+    }
+    
+    set('bootMelody', cfg.melody); set('bootSplash', cfg.splash);
+    set('ctrlBrightness', cfg.brightness);
+    document.getElementById('ctrlBrightVal').innerText = cfg.brightness;
+    set('ctrlLedEffect', cfg.led_effect);
+    
+    currentPlayState = (cfg.play === 1);
+    updatePlayStateButtons();
+    
+    if (cfg.play_mode !== undefined) {
+        set('ctrlPlayMode', cfg.play_mode);
+    }
+    
+    if (cfg.gap_delay !== undefined) {
+        const gapEl = document.getElementById('ctrlGapDelay');
+        if (gapEl) {
+            gapEl.value = cfg.gap_delay;
+            document.getElementById('gapDelayVal').innerText = cfg.gap_delay + ' ms';
+        }
+    }
+    
+    document.getElementById('ctrlSound').checked = (cfg.sound_state === 1);
+    // Sync clock mode button state
+    if (cfg.clock_12h !== undefined) setClockMode(cfg.clock_12h === 1);
+}
+
+function onSliderBrightness() {
+    document.getElementById('ctrlBrightVal').innerText = document.getElementById('ctrlBrightness').value;
+    sendCtrlSettings();
+}
+
+async function sendCtrlSettings() {
+    if (!deviceWriter) return;
+    const brightness = document.getElementById('ctrlBrightness').value;
+    const play = currentPlayState ? 1 : 0;
+    const ledEff = document.getElementById('ctrlLedEffect').value;
+    const sound = document.getElementById('ctrlSound').checked ? 1 : 0;
+    const playMode = document.getElementById('ctrlPlayMode').value;
+    const gapDelay = document.getElementById('ctrlGapDelay').value;
+    const cmd = `SET_CTRL:${brightness},${play},${ledEff},${sound},${playMode},${gapDelay}\n`;
+    try { await deviceWriter.write(new TextEncoder().encode(cmd)); } catch(e) { console.warn(e); }
+}
+
+async function savePins() {
+    if (!deviceWriter) { alert('Connect the device first!'); return; }
+    if (!confirm('Save pin settings and reboot device?')) return;
+    const sda = document.getElementById('pinSda').value;
+    const scl = document.getElementById('pinScl').value;
+    const touch = document.getElementById('pinTouch').value;
+    const buzzer = document.getElementById('pinBuzzer').value;
+    const led = document.getElementById('pinLed').value;
+    const dt = document.getElementById('pinDisplayType').value;
+    const cmd = `SET_PINS:${sda},${scl},${touch},${buzzer},${led},${dt}\n`;
+    await deviceWriter.write(new TextEncoder().encode(cmd));
+    alert('Pins saved! Device is rebooting...');
+    await connectUSBController(); // disconnect
+}
+
+async function saveBootloader() {
+    if (!deviceWriter) { alert('Connect the device first!'); return; }
+    const delay = document.getElementById('bootDelay').value;
+    const slot  = document.getElementById('activeSlot').value;
+    const mel   = document.getElementById('bootMelody').value;
+    const spl   = document.getElementById('bootSplash').value;
+    const cmd = `SET_BOOTLOADER:${delay},${slot},${mel},${spl}\n`;
+    await deviceWriter.write(new TextEncoder().encode(cmd));
+    alert('Boot settings saved!');
+}
+
+
+// ======================================================
+// TAB 3 — ANIMATION CONVERTER (Video + GIF support)
+// Non-blocking frame extraction using yieldToUI()
+// ======================================================
+const videoEl    = document.getElementById('videoEl');
+const gifEl      = document.getElementById('gifEl');
+const noMediaPh  = document.getElementById('noMediaPlaceholder');
+const canvas     = document.getElementById('canvas');
+const ctx        = canvas.getContext('2d', { willReadFrequently: true });
+ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+
+const offscreen  = document.createElement('canvas');
+const offCtx     = offscreen.getContext('2d', { willReadFrequently: true });
+
+const rotateBtn      = document.getElementById('rotateBtn');
+const convertBtn     = document.getElementById('convertBtn');
+const frameCountSpan = document.getElementById('frameCount');
+const ditherModeInput = document.getElementById('ditherMode');
+const scaleModeInput  = document.getElementById('scaleMode');
+const customControls  = document.getElementById('customControls');
+const videoFpsInput   = document.getElementById('videoFps');
+const thicknessInput  = document.getElementById('thickness');
+const thresholdInput  = document.getElementById('threshold');
+const contrastInput   = document.getElementById('contrast');
+const brightnessInput = document.getElementById('brightness');
+const invertInput     = document.getElementById('invert');
+const customW = document.getElementById('customW');
+const customH = document.getElementById('customH');
+const customX = document.getElementById('customX');
+const customY = document.getElementById('customY');
+
+let rotationAngle = 0;
+let isConverting  = false;
+let currentMediaType = ''; // 'video' or 'gif'
+let parsedGifFrames = [];  // Decoded GIF frames in memory
+let gifPlaybackIndex = 0;
+let gifPlaybackTimer = null;
+let animRafId = null;
+
+const bayer8x8 = [
+    [ 0,32, 8,40, 2,34,10,42],[48,16,56,24,50,18,58,26],
+    [12,44, 4,36,14,46, 6,38],[60,28,52,20,62,30,54,22],
+    [ 3,35,11,43, 1,33, 9,41],[51,19,59,27,49,17,57,25],
+    [15,47, 7,39,13,45, 5,37],[63,31,55,23,61,29,53,21]
+];
+
+// Dynamic slots structures
+let loadedFiles = {};
+let generatedHeaders = {};
+let activePreviewSlot = 1;
+let slotCount = 10;
+
+const slotsTableBody = document.getElementById('slotsTableBody');
+
+function initSlotsTable() {
+    slotsTableBody.innerHTML = '';
+    for (let i = 1; i <= slotCount; i++) {
+        appendSlotRowToDOM(i);
+    }
+}
+
+function appendSlotRowToDOM(i) {
+    const tr = document.createElement('tr');
+    tr.id = `slot-row-${i}`;
+    
+    // Column 1: Radio button for preview selection
+    const tdRadio = document.createElement('td');
+    tdRadio.className = 'text-center';
+    tdRadio.innerHTML = `<input type="radio" name="previewSlot" id="prevSlotRadio-${i}" value="${i}" ${i===activePreviewSlot?'checked':''} onchange="selectPreviewSlot(${i})">`;
+    tr.appendChild(tdRadio);
+    
+    // Column 2: Slot label
+    const tdLabel = document.createElement('td');
+    tdLabel.className = 'fw-bold';
+    tdLabel.innerText = `Slot ${i}`;
+    tr.appendChild(tdLabel);
+    
+    // Column 3: Filename display
+    const tdFile = document.createElement('td');
+    tdFile.id = `slot-file-display-${i}`;
+    tdFile.className = 'text-secondary';
+    tdFile.innerText = 'Empty (No file)';
+    tr.appendChild(tdFile);
+    
+    // Column 4: File browse & remove action
+    const tdAction = document.createElement('td');
+    tdAction.className = 'text-end';
+    tdAction.innerHTML = `
+        <input type="file" id="slot-input-${i}" style="display:none;" accept="video/*,.gif,image/gif" onchange="handleSlotFileChange(${i})">
+        <button id="slot-browse-${i}" class="btn btn-sm btn-outline-accent py-0 px-2 fw-bold" onclick="document.getElementById('slot-input-${i}').click()">📁</button>
+        <button id="slot-clear-${i}" class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="clearSlotFile(${i})" style="display:none;">🗑</button>
+    `;
+    tr.appendChild(tdAction);
+    
+    slotsTableBody.appendChild(tr);
+}
+
+function addSlotRow() {
+    slotCount++;
+    appendSlotRowToDOM(slotCount);
+}
+
+function clearAllSlots() {
+    for (let i = 1; i <= slotCount; i++) {
+        clearSlotFile(i);
+    }
+}
+
+async function handleZipUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    await loadZipOfVideos(file);
+    e.target.value = '';
+}
+
+async function loadZipOfVideos(file) {
+    try {
+        const zip = await JSZip.loadAsync(file);
+        let loadedCount = 0;
+        
+        // Clear existing slots first
+        clearAllSlots();
+        
+        // Find video/gif files in zip
+        const fileNames = Object.keys(zip.files).sort();
+        for (const name of fileNames) {
+            const zipFile = zip.files[name];
+            if (zipFile.dir) continue;
+            
+            const lowerName = name.toLowerCase();
+            const isVideo = lowerName.endsWith('.mp4') || lowerName.endsWith('.webm') || lowerName.endsWith('.ogg') || lowerName.endsWith('.mov');
+            const isGif = lowerName.endsWith('.gif');
+            
+            if (isVideo || isGif) {
+                const blob = await zipFile.async("blob");
+                const mimeType = isGif ? "image/gif" : `video/${lowerName.slice(-3)}`;
+                const fileObj = new File([blob], name.split('/').pop(), { type: mimeType });
+                
+                // Add new slot row if needed
+                if (loadedCount >= slotCount) {
+                    addSlotRow();
+                }
+                
+                const slotNum = loadedCount + 1;
+                loadedFiles[slotNum] = fileObj;
+                
+                // Update filename display
+                const disp = document.getElementById(`slot-file-display-${slotNum}`);
+                disp.innerText = fileObj.name;
+                disp.className = 'text-white';
+                
+                // Show clear button
+                document.getElementById(`slot-clear-${slotNum}`).style.display = 'inline-block';
+                
+                loadedCount++;
+            }
+        }
+        
+        if (loadedCount > 0) {
+            convertBtn.disabled = false;
+            // Select slot 1 for preview
+            selectPreviewSlot(1);
+            alert(`Successfully loaded ${loadedCount} files from ZIP!`);
+        } else {
+            alert("No video or GIF files found in the ZIP.");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Failed to load ZIP file: " + e.message);
+    }
+}
+
+function handleSlotFileChange(slotNum) {
+    const input = document.getElementById(`slot-input-${slotNum}`);
+    const file = input.files[0];
+    if (!file) return;
+    
+    loadedFiles[slotNum] = file;
+    
+    // Update filename display
+    const disp = document.getElementById(`slot-file-display-${slotNum}`);
+    disp.innerText = file.name;
+    disp.className = 'text-white';
+    
+    // Show clear button
+    document.getElementById(`slot-clear-${slotNum}`).style.display = 'inline-block';
+    
+    // Enable convert button
+    convertBtn.disabled = false;
+    
+    // If this slot is currently selected for preview, trigger render
+    if (activePreviewSlot === slotNum) {
+        loadPreviewFile(file);
+    } else {
+        if (!currentMediaType) {
+            document.getElementById(`prevSlotRadio-${slotNum}`).checked = true;
+            selectPreviewSlot(slotNum);
+        }
+    }
+}
+
+function clearSlotFile(slotNum) {
+    loadedFiles[slotNum] = null;
+    delete generatedHeaders[slotNum];
+    
+    document.getElementById(`slot-input-${slotNum}`).value = '';
+    const disp = document.getElementById(`slot-file-display-${slotNum}`);
+    disp.innerText = 'Empty (No file)';
+    disp.className = 'text-secondary';
+    document.getElementById(`slot-clear-${slotNum}`).style.display = 'none';
+    
+    let anyFiles = Object.values(loadedFiles).some(f => f);
+    if (!anyFiles) {
+        convertBtn.disabled = true;
+    }
+    
+    if (activePreviewSlot === slotNum) {
+        clearPreviewPane();
+    }
+}
+
+function selectPreviewSlot(slotNum) {
+    activePreviewSlot = slotNum;
+    const file = loadedFiles[slotNum];
+    if (file) {
+        loadPreviewFile(file);
+    } else {
+        clearPreviewPane();
+    }
+}
+
+function loadPreviewFile(file) {
+    return new Promise((resolve) => {
+        const isGif = file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
+        const url = URL.createObjectURL(file);
+        rotationAngle = 0;
+        
+        if (gifPlaybackTimer) {
+            clearTimeout(gifPlaybackTimer);
+            gifPlaybackTimer = null;
+        }
+        parsedGifFrames = [];
+        currentMediaType = '';
+        
+        if (isGif) {
+            currentMediaType = 'gif';
+            videoEl.style.display = 'none';
+            noMediaPh.style.display = 'none';
+            gifEl.style.display = 'block';
+            gifEl.src = url;
+            
+            if (!window.GifReader) {
+                const err = new Error("GIF decoder library (omggif.js) failed to load locally.");
+                console.error(err);
+                setStatus("❌ GIF Loader Error: " + err.message, '#e74c3c');
+                resolve({ success: false, error: err });
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const arrayBuffer = e.target.result;
+                    const gifReader = new window.GifReader(new Uint8Array(arrayBuffer));
+                    const numFrames = gifReader.numFrames();
+                    
+                    if (numFrames === 0) {
+                        throw new Error("No animation frames could be decoded from this GIF.");
+                    }
+                    
+                    const gifWidth = gifReader.width;
+                    const gifHeight = gifReader.height;
+                    
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = gifWidth;
+                    tempCanvas.height = gifHeight;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    const pixels = new Uint8ClampedArray(gifWidth * gifHeight * 4);
+                    
+                    parsedGifFrames = [];
+                    let currentTime = 0;
+                    
+                    for (let i = 0; i < numFrames; i++) {
+                        const frameInfo = gifReader.frameInfo(i);
+                        gifReader.decodeAndBlitFrameRGBA(i, pixels);
+                        
+                        const imgData = tempCtx.createImageData(gifWidth, gifHeight);
+                        imgData.data.set(pixels);
+                        tempCtx.putImageData(imgData, 0, 0);
+                        
+                        const frameCanvas = document.createElement('canvas');
+                        frameCanvas.width = gifWidth;
+                        frameCanvas.height = gifHeight;
+                        const frameCtx = frameCanvas.getContext('2d');
+                        frameCtx.drawImage(tempCanvas, 0, 0);
+                        
+                        const frameDelay = (frameInfo.delay || 10) * 10;
+                        
+                        parsedGifFrames.push({
+                            canvas: frameCanvas,
+                            startTime: currentTime,
+                            endTime: currentTime + frameDelay,
+                            delay: frameDelay
+                        });
+                        
+                        currentTime += frameDelay;
+                    }
+                    
+                    gifPlaybackIndex = 0;
+                    playGifPreview();
+                    syncFormatControls();
+                    resolve({ success: true });
+                } catch (err) {
+                    console.error("Error parsing GIF:", err);
+                    setStatus("❌ GIF Parse Error: " + err.message, '#e74c3c');
+                    resolve({ success: false, error: err });
+                }
+            };
+            reader.onerror = function() {
+                const err = new Error("Failed to read GIF file data.");
+                setStatus("❌ File Read Error", '#e74c3c');
+                resolve({ success: false, error: err });
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            currentMediaType = 'video';
+            gifEl.style.display = 'none';
+            noMediaPh.style.display = 'none';
+            videoEl.style.display = 'block';
+            videoEl.src = url;
+            videoEl.load();
+            videoEl.onloadeddata = () => {
+                setStatus(`Slot ${activePreviewSlot} preview loaded.`);
+                renderCurrentFrame();
+                syncFormatControls();
+                resolve({ success: true });
+            };
+            videoEl.onerror = () => {
+                const err = new Error("Failed to load video file.");
+                console.error(err);
+                resolve({ success: false, error: err });
+            };
+        }
+    });
+}
+
+function clearPreviewPane() {
+    if (gifPlaybackTimer) {
+        clearTimeout(gifPlaybackTimer);
+        gifPlaybackTimer = null;
+    }
+    parsedGifFrames = [];
+    currentMediaType = '';
+    syncFormatControls();
+    videoEl.style.display = 'none';
+    videoEl.src = '';
+    gifEl.style.display = 'none';
+    gifEl.src = '';
+    noMediaPh.style.display = 'block';
+    setStatus('Waiting for file...');
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 128, 64);
+}
+
+// Bind label helpers
+function bindLbl(inputId, lblId, suffix='') {
+    document.getElementById(inputId).addEventListener('input', e => {
+        document.getElementById(lblId).innerText = e.target.value + suffix;
+    });
+}
+bindLbl('threshold','threshVal');
+bindLbl('contrast','contrastVal','%'); bindLbl('brightness','brightVal','%');
+bindLbl('customW','cwVal'); bindLbl('customH','chVal');
+bindLbl('customX','cxVal'); bindLbl('customY','cyVal');
+
+// Format-specific label bindings
+bindLbl('videoFps','videoFpsVal');
+bindLbl('videoMaxDuration','videoMaxDurationVal','s');
+bindLbl('gifCustomFrameCount','gifCustomFrameCountVal');
+bindLbl('gifOverrideDelay','gifOverrideDelayVal',' ms');
+
+function syncFormatControls() {
+    const card = document.getElementById('formatControlsCard');
+    const vidSec = document.getElementById('videoSpecificControls');
+    const gifSec = document.getElementById('gifSpecificControls');
+    const title = document.getElementById('formatTitle');
+    
+    if (!card) return;
+    
+    if (currentMediaType === 'gif') {
+        card.style.display = 'block';
+        vidSec.style.display = 'none';
+        gifSec.style.display = 'block';
+        title.innerHTML = '📁 GIF Import Options';
+        
+        const frameMode = document.getElementById('gifFrameMode').value;
+        document.getElementById('gifCustomFrameCountGroup').style.display = frameMode === 'custom' ? 'block' : 'none';
+        
+        const delayMode = document.getElementById('gifDelayMode').value;
+        document.getElementById('gifOverrideDelayGroup').style.display = delayMode === 'override' ? 'block' : 'none';
+    } else if (currentMediaType === 'video') {
+        card.style.display = 'block';
+        vidSec.style.display = 'block';
+        gifSec.style.display = 'none';
+        title.innerHTML = '🎥 Video Import Options';
+    } else {
+        card.style.display = 'none';
+    }
+}
+
+document.getElementById('gifFrameMode').addEventListener('change', syncFormatControls);
+document.getElementById('gifDelayMode').addEventListener('change', syncFormatControls);
+
+document.getElementById('resetVideoFps').addEventListener('click', () => {
+    const el = document.getElementById('videoFps');
+    el.value = 10;
+    document.getElementById('videoFpsVal').innerText = '10';
+    if (!isConverting) renderCurrentFrame();
+});
+document.getElementById('resetVideoDuration').addEventListener('click', () => {
+    const el = document.getElementById('videoMaxDuration');
+    el.value = 3;
+    document.getElementById('videoMaxDurationVal').innerText = '3s';
+    if (!isConverting) renderCurrentFrame();
+});
+
+thicknessInput.addEventListener('input', () => {
+    const v = parseFloat(thicknessInput.value);
+    document.getElementById('thickVal').innerText = v===0?'Normal':v>0?`White +${v}`:`Black +${Math.abs(v)}`;
+    if (!isConverting && (currentMediaType === 'gif' || (currentMediaType === 'video' && videoEl.paused))) renderCurrentFrame();
+});
+
+scaleModeInput.addEventListener('change', () => {
+    const m = scaleModeInput.value;
+    customControls.style.display = (m==='custom'||m==='cover') ? 'block':'none';
+    document.getElementById('grpW').style.display = m==='custom'?'block':'none';
+    document.getElementById('grpH').style.display = m==='custom'?'block':'none';
+    if (!isConverting && (currentMediaType === 'gif' || (currentMediaType === 'video' && videoEl.paused))) renderCurrentFrame();
+});
+
+rotateBtn.addEventListener('click', () => {
+    rotationAngle = (rotationAngle + 90) % 360;
+    if (!isConverting) renderCurrentFrame();
+});
+
+// Video playback -> live preview
+videoEl.addEventListener('play', () => {
+    if (animRafId) cancelAnimationFrame(animRafId);
+    function loop() { if (!videoEl.paused && !videoEl.ended && !isConverting) { renderCurrentFrame(); animRafId = requestAnimationFrame(loop); } }
+    animRafId = requestAnimationFrame(loop);
+});
+videoEl.addEventListener('pause', () => { if (animRafId) { cancelAnimationFrame(animRafId); animRafId=null; } renderCurrentFrame(); });
+videoEl.addEventListener('seeked', () => { if (videoEl.paused && !isConverting) renderCurrentFrame(); });
+
+// Parameters live preview
+const paramEls = [ditherModeInput, thresholdInput, contrastInput, brightnessInput, invertInput,
+                  customW, customH, customX, customY,
+                  document.getElementById('videoFps'), document.getElementById('videoMaxDuration'),
+                  document.getElementById('gifCustomFrameCount'), document.getElementById('gifOverrideDelay')];
+paramEls.forEach(el => {
+    if (!el) return;
+    ['input','change'].forEach(ev => el.addEventListener(ev, () => {
+        if (!isConverting) renderCurrentFrame();
+    }));
+});
+
+function playGifPreview() {
+    if (gifPlaybackTimer) clearTimeout(gifPlaybackTimer);
+    if (currentMediaType !== 'gif' || parsedGifFrames.length === 0) return;
+    
+    renderCurrentFrame();
+    
+    const currentFrame = parsedGifFrames[gifPlaybackIndex];
+    gifPlaybackTimer = setTimeout(() => {
+        gifPlaybackIndex = (gifPlaybackIndex + 1) % parsedGifFrames.length;
+        playGifPreview();
+    }, currentFrame.delay || 100);
+}
+
+function renderCurrentFrame() {
+    if (currentMediaType === 'gif') {
+        if (parsedGifFrames.length > 0) {
+            const frameCanvas = parsedGifFrames[gifPlaybackIndex].canvas;
+            applyImageProcessing(frameCanvas);
+        }
+    } else {
+        const src = currentMediaType==='video' ? videoEl : null;
+        if (!src) return;
+        if (!videoEl.videoWidth || !videoEl.videoHeight) return;
+        applyImageProcessing(src);
+    }
+}
+
+function applyImageProcessing(src) {
+    const W = 128, H = 64;
+    const srcW = src.videoWidth || src.naturalWidth || src.width;
+    const srcH = src.videoHeight || src.naturalHeight || src.height;
+    if (!srcW || !srcH) return;
+
+    let effSrcW = srcW, effSrcH = srcH;
+    if (rotationAngle===90||rotationAngle===270) { effSrcW = srcH; effSrcH = srcW; }
+
+    offscreen.width  = W; offscreen.height = H;
+    offCtx.fillStyle = '#000';
+    offCtx.fillRect(0,0,W,H);
+    offCtx.save();
+    offCtx.translate(W/2,H/2);
+    offCtx.rotate(rotationAngle*Math.PI/180);
+
+    const mode = scaleModeInput.value;
+    if (mode==='stretch') {
+        offCtx.drawImage(src, -W/2,-H/2,W,H);
+    } else if (mode==='fit') {
+        const s = Math.min(W/effSrcW, H/effSrcH);
+        offCtx.drawImage(src, -effSrcW*s/2, -effSrcH*s/2, effSrcW*s, effSrcH*s);
+    } else if (mode==='cover') {
+        const s = Math.max(W/effSrcW, H/effSrcH);
+        const px = parseFloat(customX.value), py = parseFloat(customY.value);
+        offCtx.drawImage(src, -effSrcW*s/2+px, -effSrcH*s/2+py, effSrcW*s, effSrcH*s);
+    } else if (mode==='custom') {
+        const cw=parseFloat(customW.value), ch=parseFloat(customH.value);
+        const px=parseFloat(customX.value), py=parseFloat(customY.value);
+        offCtx.drawImage(src, -cw/2+px, -ch/2+py, cw, ch);
+    }
+    offCtx.restore();
+
+    const imgData = offCtx.getImageData(0,0,W,H);
+    const d       = imgData.data;
+
+    // Contrast + Brightness
+    const cFactor = parseFloat(contrastInput.value)/100;
+    const bFactor = parseFloat(brightnessInput.value)/100;
+    const cMul = (259*(cFactor*255+255))/(255*(259-cFactor*255));
+    for (let i=0;i<d.length;i+=4) {
+        let g = 0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+        g = (g-128)*cMul+128;
+        g = g*bFactor;
+        g = Math.max(0,Math.min(255,g));
+        d[i]=d[i+1]=d[i+2]=g;
+    }
+
+    // Thickness
+    const thick = parseFloat(thicknessInput.value);
+    if (thick!==0) {
+        const copy = new Uint8ClampedArray(d);
+        for (let y=1;y<H-1;y++) for (let x=1;x<W-1;x++) {
+            const idx=(y*W+x)*4;
+            let mx=copy[idx],mn=copy[idx];
+            for (let ny=-1;ny<=1;ny++) for (let nx=-1;nx<=1;nx++) {
+                const ni=((y+ny)*W+(x+nx))*4;
+                mx=Math.max(mx,copy[ni]); mn=Math.min(mn,copy[ni]);
+            }
+            d[idx]=d[idx+1]=d[idx+2]= thick>0 ? mn+(mx-mn)*(thick/3) : mx-(mx-mn)*(Math.abs(thick)/3);
+        }
+    }
+
+    // Dithering
+    const dither = ditherModeInput.value;
+    const thresh = parseInt(thresholdInput.value);
+    const inv    = invertInput.checked;
+    if (dither==='threshold') {
+        for (let i=0;i<d.length;i+=4) { let v=d[i]>=thresh?255:0; if(inv)v=255-v; d[i]=d[i+1]=d[i+2]=v; }
+    } else if (dither==='bayer') {
+        for (let y=0;y<H;y++) for (let x=0;x<W;x++) {
+            const idx=(y*W+x)*4;
+            const bt=(bayer8x8[y%8][x%8]+.5)*4;
+            let v=d[idx]>=bt?255:0; if(inv)v=255-v;
+            d[idx]=d[idx+1]=d[idx+2]=v;
+        }
+    } else {
+        const buf=new Float32Array(W*H);
+        for(let i=0;i<buf.length;i++) buf[i]=d[i*4];
+        for (let y=0;y<H;y++) for (let x=0;x<W;x++) {
+            const idx=y*W+x, op=buf[idx], np=op>=thresh?255:0;
+            buf[idx]=np; const err=op-np;
+            if(dither==='floyd'){
+                if(x+1<W)buf[idx+1]+=err*7/16;
+                if(y+1<H){if(x>0)buf[idx+W-1]+=err*3/16;buf[idx+W]+=err*5/16;if(x+1<W)buf[idx+W+1]+=err/16;}
+            } else {
+                if(x+1<W)buf[idx+1]+=err/8; if(x+2<W)buf[idx+2]+=err/8;
+                if(y+1<H){if(x>0)buf[idx+W-1]+=err/8;buf[idx+W]+=err/8;if(x+1<W)buf[idx+W+1]+=err/8;}
+                if(y+2<H)buf[idx+2*W]+=err/8;
+            }
+        }
+        for(let i=0;i<buf.length;i++){let v=buf[i]>=thresh?255:0;if(inv)v=255-v;d[i*4]=d[i*4+1]=d[i*4+2]=v;}
+    }
+    ctx.putImageData(imgData,0,0);
+}
+
+function extractFrameBits() {
+    const d = ctx.getImageData(0,0,128,64).data;
+    const bits = new Uint8Array(1024);
+    for (let i=0;i<d.length;i+=4) {
+        const pi=i/4, bi=Math.floor(pi/8), bit=7-(pi%8);
+        if(d[i]>128) bits[bi]|=(1<<bit);
+    }
+    return bits;
+}
+
+// MAIN CONVERT — sequential with live preview updates
+convertBtn.addEventListener('click', async () => {
+    if (isConverting) return;
+    
+    const activeSlots = [];
+    for (let i = 1; i <= slotCount; i++) {
+        if (loadedFiles[i]) activeSlots.push(i);
+    }
+    
+    if (activeSlots.length === 0) {
+        alert('Load at least one video or GIF file first!');
+        return;
+    }
+
+    isConverting = true;
+    convertBtn.disabled = true;
+    document.getElementById('downloadArrayBtn').disabled = true;
+    document.getElementById('downloadZipBtn').disabled = true;
+    document.getElementById('convertProgress').style.display = 'block';
+
+    try {
+        videoEl.pause();
+        
+        for (let idx = 0; idx < activeSlots.length; idx++) {
+            const slot = activeSlots[idx];
+            const file = loadedFiles[slot];
+            await processSlotFile(slot, file);
+        }
+
+        setStatus('✅ All animations converted successfully!', '#2ecc71');
+        document.getElementById('downloadArrayBtn').disabled = false;
+        document.getElementById('downloadZipBtn').disabled = false;
+    } catch(err) {
+        setStatus('❌ Error: ' + err.message, '#e74c3c');
+        console.error(err);
+    } finally {
+        isConverting = false;
+        convertBtn.disabled = false;
+        // Re-render preview
+        renderCurrentFrame();
+    }
+});
+
+async function processSlotFile(slotNum, file) {
+    const isGif = file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
+    
+    // Select slot preview & load (awaits until it is fully loaded)
+    activePreviewSlot = slotNum;
+    const loadResult = await loadPreviewFile(file);
+    if (loadResult && loadResult.success === false) {
+        throw loadResult.error;
+    }
+    
+    if (!isGif) {
+        const fps = parseInt(document.getElementById('videoFps').value);
+        const maxDuration = parseFloat(document.getElementById('videoMaxDuration').value);
+        const duration = Math.min(videoEl.duration, maxDuration);
+        const total    = Math.floor(duration * fps);
+        const step     = 1 / fps;
+        const frames   = [];
+
+        for (let f = 0; f < total; f++) {
+            setStatus(`Slot ${slotNum}: Processing frame ${f+1} / ${total}...`);
+            videoEl.currentTime = f * step;
+            await new Promise(res => {
+                const seekedHandler = () => {
+                    videoEl.removeEventListener('seeked', seekedHandler);
+                    res();
+                };
+                videoEl.addEventListener('seeked', seekedHandler);
+            });
+            applyImageProcessing(videoEl);
+            frames.push(extractFrameBits());
+            frameCountSpan.innerText = f + 1;
+            document.getElementById('convertProgressBar').style.width = Math.round((f+1)/total*100) + '%';
+            if (f % 5 === 0) await yieldToUI();
+        }
+        
+        saveHeaderCode(slotNum, frames, fps);
+    } else {
+        if (!parsedGifFrames || parsedGifFrames.length === 0) {
+            throw new Error("No decoded GIF frames available. The GIF might be corrupted or empty.");
+        }
+        
+        const frameMode = document.getElementById('gifFrameMode').value;
+        const delayMode = document.getElementById('gifDelayMode').value;
+        
+        let numFrames = parsedGifFrames.length;
+        if (frameMode === 'custom') {
+            numFrames = parseInt(document.getElementById('gifCustomFrameCount').value);
+        }
+        
+        const frames = [];
+        const totalDuration = parsedGifFrames.reduce((acc, f) => acc + f.delay, 0) || 3000;
+        
+        for (let i = 0; i < numFrames; i++) {
+            setStatus(`Slot ${slotNum}: Processing GIF frame ${i+1} / ${numFrames}...`);
+            
+            let sourceFrameIndex = 0;
+            if (frameMode === 'all') {
+                sourceFrameIndex = i;
+            } else {
+                const ratio = i / (numFrames - 1 || 1);
+                sourceFrameIndex = Math.min(
+                    parsedGifFrames.length - 1,
+                    Math.floor(ratio * parsedGifFrames.length)
+                );
+            }
+            
+            const selectedFrame = parsedGifFrames[sourceFrameIndex];
+            applyImageProcessing(selectedFrame.canvas);
+            frames.push(extractFrameBits());
+            
+            frameCountSpan.innerText = i + 1;
+            document.getElementById('convertProgressBar').style.width = Math.round((i+1)/numFrames*100) + '%';
+            
+            if (i % 5 === 0) await yieldToUI();
+        }
+        
+        let finalDelay = 100;
+        if (delayMode === 'natural') {
+            finalDelay = Math.round(totalDuration / numFrames);
+        } else {
+            finalDelay = parseInt(document.getElementById('gifOverrideDelay').value);
+        }
+        
+        saveHeaderCode(slotNum, frames, 1000 / finalDelay);
+    }
+}
+
+function saveHeaderCode(slotNum, frames, fps) {
+    const prefix = 'VIDEO' + slotNum;
+    let code = `// OLO Show animation — Slot ${slotNum}\n`;
+    code += `#ifndef VIDEO${slotNum}_H\n#define VIDEO${slotNum}_H\n\n`;
+    code += `#include <Arduino.h>\n\n`;
+    code += `const int ${prefix}_TOTAL_FRAMES = ${frames.length};\n`;
+    code += `const int ${prefix}_FRAME_DELAY  = ${Math.round(1000/fps)};\n\n`;
+    code += `const unsigned char video${slotNum}_frames[][1024] PROGMEM = {\n`;
+    for (let f=0;f<frames.length;f++) {
+        code += `  {\n    `;
+        const b = frames[f];
+        for (let i=0;i<b.length;i++) {
+            let h=b[i].toString(16).toUpperCase();
+            code += `0x${h.padStart(2,'0')}`;
+            if(i<b.length-1) code += i%16===15?',\n    ':',';
+        }
+        code += `\n  }${f<frames.length-1?',':''}\n`;
+    }
+    code += `};\n\n#endif // VIDEO${slotNum}_H\n`;
+    generatedHeaders[slotNum] = code;
+}
+
+function downloadHeaderFile() {
+    const slot = activePreviewSlot;
+    const code = generatedHeaders[slot];
+    if (!code) { alert(`No data yet for Slot ${slot} — run Convert first!`); return; }
+    
+    const fn   = `video${slot}.h`;
+    const a    = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(new Blob([code], {type:'text/plain'})),
+        download: fn
+    });
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function downloadAllZip() {
+    const zip = new JSZip();
+    let count = 0;
+    for (let i = 1; i <= slotCount; i++) {
+        if (generatedHeaders[i]) {
+            zip.file(`video${i}.h`, generatedHeaders[i]);
+            count++;
+        }
+    }
+    
+    if (count === 0) {
+        alert("No generated headers to export yet!");
+        return;
+    }
+    
+    // Generate and pack GeneratedVideos.h registry header
+    let genHeader = `// OLO Show Dynamic Videos Registry\n`;
+    genHeader += `#ifndef GENERATED_VIDEOS_H\n`;
+    genHeader += `#define GENERATED_VIDEOS_H\n\n`;
+    genHeader += `#include <Arduino.h>\n\n`;
+    for (let i = 1; i <= slotCount; i++) {
+        genHeader += `#include "video${i}.h"\n`;
+    }
+    genHeader += `\n#define MAX_ANIM_SLOTS ${slotCount}\n\n`;
+    genHeader += `struct SlotInfo {\n`;
+    genHeader += `  const unsigned char (*frames)[1024];\n`;
+    genHeader += `  int total_frames;\n`;
+    genHeader += `  int frame_delay;\n`;
+    genHeader += `};\n\n`;
+    genHeader += `const SlotInfo SLOT_TABLE[MAX_ANIM_SLOTS] = {\n`;
+    for (let i = 1; i <= slotCount; i++) {
+        genHeader += `  { video${i}_frames, VIDEO${i}_TOTAL_FRAMES, VIDEO${i}_FRAME_DELAY },\n`;
+    }
+    genHeader += `};\n\n`;
+    genHeader += `#endif // GENERATED_VIDEOS_H\n`;
+    
+    zip.file("GeneratedVideos.h", genHeader);
+    
+    zip.generateAsync({type: "blob"}).then(function(content) {
+        const a = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(content),
+            download: "olo_show_headers.zip"
+        });
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    });
+}
+
+// Reset buttons
+function setupReset(btnId, inputId, def, extra) {
+    const btn = document.getElementById(btnId);
+    const inp = document.getElementById(inputId);
+    if (btn && inp) btn.addEventListener('click', () => {
+        inp.value = def;
+        inp.dispatchEvent(new Event('input'));
+        if (extra) extra();
+        if (!isConverting) renderCurrentFrame();
+    });
+}
+setupReset('resetX', 'customX', 0);
+setupReset('resetY', 'customY', 0);
+setupReset('resetFps', 'fps', 10);
+setupReset('resetThick', 'thickness', 0);
+setupReset('resetContrast', 'contrast', 100);
+setupReset('resetBrightness', 'brightness', 100);
+setupReset('resetThresh', 'threshold', 128);
+
+// Initialize slots table
+initSlotsTable();
+</script>
+</body>
+</html>
