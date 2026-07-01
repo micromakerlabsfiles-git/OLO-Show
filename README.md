@@ -59,14 +59,28 @@ OLO_Show/
 ├── 📁 src/
 │   └── 📄 main.cpp                 ← Main ESP32/RP2040 firmware source code
 │
-└── 📁 include/
-    ├── 📄 Config.h                 ← Hardware pin definitions & feature configuration
-    └── 📄 GeneratedVideos.h        ← Animation slot registry (example / auto-generated)
+├── 📁 include/
+│   ├── 📄 Config.h                 ← Hardware pin definitions & feature configuration
+│   └── 📄 GeneratedVideos.h        ← Animation slot registry (example / auto-generated)
+│
+└── 📁 dist/                        ← ⚠️ Required for Standard Factory Flasher
+    ├── 📄 manifest.json            ← esp-web-tools manifest (lists firmware parts & offsets)
+    ├── 📄 firmware.bin             ← Factory firmware image (offset 0x10000)
+    ├── 📄 bootloader.bin           ← ESP32 bootloader (offset 0x0000)
+    └── 📄 partitions.bin           ← Partition table (offset 0x8000)
 ```
 
 > **Note on `include/video1.h`:** This is a large sample animation header (~1.2 MB). It is optional — include it as a demo or leave it out and have users generate their own using `index.html`.
 
+> [!IMPORTANT]
+> The `dist/` folder **must be present** alongside `index.html` for the **Standard Factory Flasher** to work. The `<esp-web-install-button>` component fetches `dist/manifest.json` at runtime — if it is missing you will see **"Failed to download manifest"**. Commit the entire `dist/` folder to your repository.
+
 ---
+
+> [!NOTE]
+> **`dist/`** is intentionally **tracked** in this repo. It contains `manifest.json`, `firmware.bin`, `bootloader.bin`, and `partitions.bin` which are required by the Standard Factory Flasher. Do **not** add `dist/` to `.gitignore`.
+>
+> **`OLO_Show_Builder.exe`** is also intentionally tracked so Windows users can download and run the builder without installing Python.
 
 ### 📋 Recommended `.gitignore`
 
@@ -398,15 +412,19 @@ pyinstaller --noconfirm --onefile --windowed --name "OLO_Show_Builder" build_fir
 | **LED not lighting / wrong colour** | Verify `LED_PIN` and `NUM_PIXELS` in `Config.h`. Check NeoPixel power supply. |
 | **GIF not converting properly** | Ensure `omggif.js` is in the **same folder** as `index.html`. |
 
+---
+
+## 📄 License
+
+This project is open source. See [LICENSE](LICENSE) for details.
 
 ---
 
 ## 🙏 Credits
 
-- **OLO Show** — Micromaker Labs
+- **OLO Show** — MicroMaker Labs
 - OLED drivers: [Adafruit SSD1306](https://github.com/adafruit/Adafruit_SSD1306) & [Adafruit SH110X](https://github.com/adafruit/Adafruit_SH110X)
 - NeoPixel: [Adafruit NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)
 - GIF decoding: [omggif.js](https://github.com/deanm/omggif)
 - Built with [PlatformIO](https://platformio.org/) & [Arduino Framework](https://www.arduino.cc/)
-- Core engine from : https://github.com/triwahyu45/ESP32-OLED-Video-Converter
-
+- **Core engine from : https://github.com/triwahyu45/ESP32-OLED-Video-Converter**
