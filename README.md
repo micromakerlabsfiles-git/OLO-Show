@@ -398,19 +398,15 @@ pyinstaller --noconfirm --onefile --windowed --name "OLO_Show_Builder" build_fir
 | **LED not lighting / wrong colour** | Verify `LED_PIN` and `NUM_PIXELS` in `Config.h`. Check NeoPixel power supply. |
 | **GIF not converting properly** | Ensure `omggif.js` is in the **same folder** as `index.html`. |
 
----
-
-## 📄 License
-
-This project is open source. See [LICENSE](LICENSE) for details.
 
 ---
 
 ## 🙏 Credits
 
-- **OLO Show** — MicroMaker Labs
+- **OLO Show** — Micromaker Labs
 - OLED drivers: [Adafruit SSD1306](https://github.com/adafruit/Adafruit_SSD1306) & [Adafruit SH110X](https://github.com/adafruit/Adafruit_SH110X)
 - NeoPixel: [Adafruit NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)
 - GIF decoding: [omggif.js](https://github.com/deanm/omggif)
 - Built with [PlatformIO](https://platformio.org/) & [Arduino Framework](https://www.arduino.cc/)
+- Core engine from : https://github.com/triwahyu45/ESP32-OLED-Video-Converter
 
