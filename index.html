@@ -490,10 +490,10 @@
                                 </div>
                                 <div class="mb-1">
                                     <label class="form-label d-flex justify-content-between">
-                                        <span>Max Video Duration: <span id="videoMaxDurationVal" class="text-white">3s</span></span>
-                                        <button class="reset-btn" id="resetVideoDuration">↺</button>
+                                        <span>Clip Duration: <span id="videoMaxDurationVal" class="text-white">—</span> <span id="videoDurationHint" class="text-secondary" style="font-size:0.78rem;"></span></span>
+                                        <button class="reset-btn" id="resetVideoDuration" title="Reset to full video length">↺</button>
                                     </label>
-                                    <input type="range" class="form-range" id="videoMaxDuration" min="1" max="15" value="3" step="0.5">
+                                    <input type="range" class="form-range" id="videoMaxDuration" min="0.5" max="600" value="15" step="0.5">
                                 </div>
                             </div>
                             
@@ -1414,6 +1414,20 @@ function loadPreviewFile(file) {
             videoEl.src = url;
             videoEl.load();
             videoEl.onloadeddata = () => {
+                // Dynamically set the duration slider max + value to actual video length
+                const vDur = videoEl.duration;
+                const durSlider = document.getElementById('videoMaxDuration');
+                const durLabel  = document.getElementById('videoMaxDurationVal');
+                const durHint   = document.getElementById('videoDurationHint');
+                if (durSlider && isFinite(vDur) && vDur > 0) {
+                    const rounded = Math.ceil(vDur * 2) / 2; // round up to nearest 0.5s
+                    durSlider.max   = rounded;
+                    durSlider.min   = 0.5;
+                    durSlider.step  = vDur > 60 ? 1 : 0.5;
+                    durSlider.value = rounded;   // default = full video
+                    if (durLabel) durLabel.innerText = rounded + 's';
+                    if (durHint)  durHint.innerText  = `(video: ${vDur.toFixed(1)}s)`;
+                }
                 setStatus(`Slot ${activePreviewSlot} preview loaded.`);
                 renderCurrentFrame();
                 syncFormatControls();
@@ -1459,7 +1473,11 @@ bindLbl('customX','cxVal'); bindLbl('customY','cyVal');
 
 // Format-specific label bindings
 bindLbl('videoFps','videoFpsVal');
-bindLbl('videoMaxDuration','videoMaxDurationVal','s');
+// videoMaxDuration label is updated dynamically (includes 's' suffix)
+document.getElementById('videoMaxDuration').addEventListener('input', e => {
+    const lbl = document.getElementById('videoMaxDurationVal');
+    if (lbl) lbl.innerText = parseFloat(e.target.value).toFixed(1) + 's';
+});
 bindLbl('gifCustomFrameCount','gifCustomFrameCountVal');
 bindLbl('gifOverrideDelay','gifOverrideDelayVal',' ms');
 
@@ -1503,8 +1521,11 @@ document.getElementById('resetVideoFps').addEventListener('click', () => {
 });
 document.getElementById('resetVideoDuration').addEventListener('click', () => {
     const el = document.getElementById('videoMaxDuration');
-    el.value = 3;
-    document.getElementById('videoMaxDurationVal').innerText = '3s';
+    // Reset to full video duration (the slider max = video length)
+    const fullDur = parseFloat(el.max) || 15;
+    el.value = fullDur;
+    const durLabel = document.getElementById('videoMaxDurationVal');
+    if (durLabel) durLabel.innerText = fullDur + 's';
     if (!isConverting) renderCurrentFrame();
 });
 
