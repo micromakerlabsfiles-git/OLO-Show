@@ -77,6 +77,20 @@ OLO_Show/
 
 ---
 
+### ❌ Files to Exclude from GitHub
+
+These files are auto-generated, too large for Git, or machine-specific. **Do not commit them:**
+
+| File / Folder | Reason to Exclude |
+|---|---|
+| `.pio/` | PlatformIO build cache (auto-generated on every build) |
+| `build/` | PyInstaller **work** directory (intermediate build files) |
+| `firmware_custom.bin` | User-generated custom binary (created locally per-user) |
+| `OLO_Show.7z` | Archive file — host via **GitHub Releases** if needed |
+| `*.mp4` / `*.gif` / `*.avi` | Sample media files (large; user supplies their own) |
+| `include/video*.h` | Large auto-generated animation headers (~1 MB+ each) |
+| `.vscode/` | IDE-specific settings (partially covered by `.gitignore`) |
+
 > [!NOTE]
 > **`dist/`** is intentionally **tracked** in this repo. It contains `manifest.json`, `firmware.bin`, `bootloader.bin`, and `partitions.bin` which are required by the Standard Factory Flasher. Do **not** add `dist/` to `.gitignore`.
 >
@@ -414,6 +428,12 @@ pyinstaller --noconfirm --onefile --windowed --name "OLO_Show_Builder" build_fir
 
 ---
 
+## 📄 License
+
+This project is open source. See [LICENSE](LICENSE) for details.
+
+---
+
 ## 🙏 Credits
 
 - **OLO Show** — MicroMaker Labs
@@ -421,4 +441,4 @@ pyinstaller --noconfirm --onefile --windowed --name "OLO_Show_Builder" build_fir
 - NeoPixel: [Adafruit NeoPixel](https://github.com/adafruit/Adafruit_NeoPixel)
 - GIF decoding: [omggif.js](https://github.com/deanm/omggif)
 - Built with [PlatformIO](https://platformio.org/) & [Arduino Framework](https://www.arduino.cc/)
-- **Core engine from : https://github.com/triwahyu45/ESP32-OLED-Video-Converter**
+

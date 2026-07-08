@@ -541,7 +541,7 @@
                         <div class="row g-2 align-items-center mt-1">
                             <div class="col-6 text-center">
                                 <div class="text-secondary small mb-1">Source (Video / GIF)</div>
-                                <video id="videoEl" controls muted loop
+                                <video id="videoEl" controls muted loop playsinline
                                        class="w-100 rounded border border-secondary"
                                        style="display:none;max-height:160px;"></video>
                                 <img id="gifEl"
@@ -1411,8 +1411,12 @@ function loadPreviewFile(file) {
             gifEl.style.display = 'none';
             noMediaPh.style.display = 'none';
             videoEl.style.display = 'block';
-            videoEl.src = url;
-            videoEl.load();
+
+            // Programmatically ensure video is muted and playsinline to allow autoplay
+            videoEl.muted = true;
+            videoEl.playsInline = true;
+
+            // Register handlers BEFORE setting src/loading to prevent race conditions on fast/cached loads
             videoEl.onloadeddata = () => {
                 // Dynamically set the duration slider max + value to actual video length
                 const vDur = videoEl.duration;
@@ -1431,13 +1435,23 @@ function loadPreviewFile(file) {
                 setStatus(`Slot ${activePreviewSlot} preview loaded.`);
                 renderCurrentFrame();
                 syncFormatControls();
+
+                // Attempt to auto-play the video preview
+                videoEl.play().catch(err => {
+                    console.log("Autoplay was prevented or interrupted: ", err);
+                });
+
                 resolve({ success: true });
             };
+
             videoEl.onerror = () => {
                 const err = new Error("Failed to load video file.");
                 console.error(err);
                 resolve({ success: false, error: err });
             };
+
+            videoEl.src = url;
+            videoEl.load();
         }
     });
 }
